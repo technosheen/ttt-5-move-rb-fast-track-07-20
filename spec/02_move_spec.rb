@@ -1,72 +1,66 @@
 require_relative "../lib/move.rb"
 
-describe './lib/move.rb' do
-  it 'defines a move method' do
-    board = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
-    expect(defined?(move)).to be_truthy
+describe './bin/move executing a CLI Application' do
+  it 'defines a board variable' do
+    allow($stdout).to receive(:puts)
+    allow(self).to receive(:gets).and_return("1")
+    allow(self).to receive(:move)
+
+    board = get_variable_from_file("./bin/move", "board")
+
+    expect(board).to eq([" ", " ", " ", " ", " ", " ", " ", " ", " "])
   end
 
-  context '#move' do
-    it 'accepts 3 arguments: the board, the position a player wants to fill and their char, X or O' do
-      expect{move}.to raise_error(ArgumentError)
-    end
+  it 'prints "Welcome to Tic Tac Toe!"' do
+    allow($stdout).to receive(:puts)
+    allow(self).to receive(:gets).and_return("1")
 
-    it 'provides a default value for the 3rd argument' do
-      board = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
-      expect {move(board, 2)}.to_not raise_error
-    end
+    expect($stdout).to receive(:puts).with("Welcome to Tic Tac Toe!"), "Make sure `bin/move` has code that can output 'Welcome to Tic Tac Toe!' exactly."
 
-    it 'allows "X" player in the top left position' do
-      board = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
-      move(board, 0, "X")
+    run_file("./bin/move")
+  end
 
-      expect(board).to eq(["X", " ", " ", " ", " ", " ", " ", " ", " "])
-    end
+  it 'asks the user for input' do
+    allow($stdout).to receive(:puts)
 
-    it 'allows "O" player in the middle' do
-      board = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
-      move(board, 4, "O")
+    expect(self).to receive(:gets).and_return("1"), "Make sure `bin/move` is calling `gets` at some point for user input."
 
-      expect(board).to eq([" ", " ", " ", " ", "O", " ", " ", " ", " "])
-    end
+    run_file("./bin/move")
+  end
 
-    it 'allows "X" player in the bottom right' do
-      board = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
-      move(board, 8)
+  it 'calls move passing the user input' do
+    allow($stdout).to receive(:puts)
 
-      expect(board).to eq([" ", " ", " ", " ", " ", " ", " ", " ", "X"])
-    end
+    allow(self).to receive(:gets).and_return('1')
+    expect(self).to receive(:move).with(anything, '1', any_args), "Make sure `bin/move` is passing the user input to the `#move` method."
 
-    it 'allows "X" player in the bottom right and "O" in the top left ' do
-      board = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
-      move(board, 0, "O")
-      move(board, 8, "X")
+    run_file("./bin/move")
+  end
 
-      expect(board).to eq(["O", " ", " ", " ", " ", " ", " ", " ", "X"])
-    end
+  it 'move modifies the board correctly' do
+    allow($stdout).to receive(:puts)
 
-    it 'allows "X" to win diagonally' do
-      board = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
-      move(board, 0)
-      move(board, 4)
-      move(board, 8)
+    allow(self).to receive(:gets).and_return('1')
+    board = get_variable_from_file("./bin/move", "board")
 
-      expect(board).to eq(["X", " ", " ", " ", "X", " ", " ", " ", "X"])
-    end
+    expect(board).to eq(["X", " ", " ", " ", " ", " ", " ", " ", " "])
+  end
 
-    it 'allows a tie game' do
-      board = Array.new(9, " ")
-      move(board, 0, "X")
-      move(board, 1, "O")
-      move(board, 2, "X")
-      move(board, 3, "O")
-      move(board, 4, "X")
-      move(board, 5, "O")
-      move(board, 6, "X")
-      move(board, 7, "X")
-      move(board, 8, "O")      
+  it 'calls display_board passing the modified board' do
+    allow($stdout).to receive(:puts)
 
-      expect(board).to eq(["X", "O", "X", "O", "X", "O", "X", "X", "O"])
-    end
+    allow(self).to receive(:gets).and_return('1')
+    allow(self).to receive(:display_board)
+    expect(self).to receive(:display_board).with(["X", " ", " ", " ", " ", " ", " ", " ", " "]).at_least(:once)
+
+    run_file("./bin/move")
+  end
+
+  it 'prints the board with a move to the top left' do
+    expect(self).to receive(:gets).and_return('1')
+
+    output = capture_puts{ run_file("./bin/move") }
+
+    expect(output).to include(" X |   |   ")
   end
 end
